@@ -1,0 +1,82 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.699,
+        "y": 4.128
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.9685515142867,
+        "y": 4.268299927596923
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.843352272727272,
+        "y": 3.09265625
+      },
+      "prevControl": {
+        "x": 5.795438027725748,
+        "y": 3.338021742940499
+      },
+      "nextControl": {
+        "x": 5.9609493262529405,
+        "y": 2.490449974898353
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.306,
+        "y": 0.839
+      },
+      "prevControl": {
+        "x": 1.8540840973290813,
+        "y": 1.8629321742414975
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "IntakeTrigger",
+      "waypointRelativePos": 1.7560439560439536,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeCoralActive"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 6.0,
+    "maxAcceleration": 3.15,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 53.0
+  },
+  "reversed": false,
+  "folder": "Partner",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
