@@ -8,11 +8,9 @@ import frc.robot.subsystems.EndEffector;
 import harkerrobolib.util.MathUtil;
 
 public class EEManual extends Command {
-    private boolean holdPos;
 
     public EEManual () {
         addRequirements(EndEffector.getInstance());
-        holdPos = false;
     }
 
     public void execute () {
@@ -21,19 +19,7 @@ public class EEManual extends Command {
     }
 
     private void runTusk() {
-        if (RobotContainer.getInstance().getDriver().getRightDPadState()) {
-            EndEffector.getInstance().setTuskVoltage(Constants.EndEffector.kG + 3.0);
-            holdPos = true;
-        }
-        else if (RobotContainer.getInstance().getDriver().getLeftDPadState())
-        {
-            EndEffector.getInstance().setTuskVoltage(Constants.EndEffector.kG - 3.0);
-            holdPos = true;
-        }
-        else if (holdPos) {
-            EndEffector.getInstance().moveToPosition(EndEffector.getInstance().getTuskPosition());
-            holdPos = false;
-        }
+        // EndEffector.getInstance().moveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION);
     }
 
     private void runMain() {

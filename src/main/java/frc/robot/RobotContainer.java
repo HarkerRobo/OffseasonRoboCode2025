@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -32,6 +33,7 @@ import frc.robot.commands.EE.IntakeAlgae;
 import frc.robot.commands.EE.IntakeCoralActive;
 import frc.robot.commands.EE.EEManual;
 import frc.robot.commands.EE.Score;
+import frc.robot.commands.EE.ScoreAlgae;
 import frc.robot.commands.EE.TuskMoveToPosition;
 import frc.robot.commands.EE.TuskMoveToPositionSimple;
 import frc.robot.commands.EE.ZeroTusk;
@@ -90,6 +92,7 @@ public class RobotContainer {
     private final Climb climb = Climb.getInstance();
 
     private final SendableChooser<Command> autoChooser;
+    private int selectedLevel;
 
     Function<RobotContainer.AlignDirection, Command> setDirectionFactory = ((AlignDirection direction) ->
         new Command() {
@@ -160,119 +163,70 @@ public class RobotContainer {
         driver.button(8).onTrue(alignRight);
 
         configureDriverBindings();
-        configureOperatorBindings();
 
     }
 
     public void configureDriverBindings ()
     {
-        // Score, wait 1s, zero ET
-        driver.rightBumper().onTrue(
-            new Score()
-            // .andThen(new WaitCommand(0.5)) // TODO TEST
-            .andThen(alignAlgae)
-            .andThen(new TuskMoveToPosition(0))
-            .andThen(new ZeroTusk())
-            .andThen(new MoveToPosition(0.5))
-            .andThen(new MoveToPosition(0))
-            .andThen(endEffector.runOnce(() -> endEffector.setPassive(true))));
+        driver.leftTrigger().and(()->EndEffector.getInstance().algaeIn()).onTrue(
+            new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[3])
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.REEF_TUSK_POSITION))
+            .andThen(new ScoreAlgae())
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION))
+            .andThen(new ZeroElevator()));
 
-        driver.rightTrigger().whileTrue(new DriveToPoseCommand(drivetrain));
-
-        driver.b().onTrue(new Score()//.withTimeout(1)); // Eject (AKA Score)
-        );
-
-        driver.x().onTrue(endEffector.runOnce(() -> endEffector.togglePassive()));
-
-        driver.a().onTrue(new ZeroElevator().andThen(new ZeroTusk()).andThen(endEffector.runOnce(() -> endEffector.setAlgaeIn(false))));
-
-        driver.y().onTrue(new MoveToPosition(0.03)
-                .andThen(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[0])
-                .alongWith(new Score()))
-                .andThen(new WaitCommand(0.2))
-                .andThen(new MoveToPosition(0.03)));
-
-    }
-
-    private void configureOperatorBindings ()
-    {   
-        operator.rightBumper().and(()->!operator.leftBumper().getAsBoolean()).onTrue(endEffector.runOnce(() -> endEffector.setPassive(true)));
-        
-        operator.rightBumper().and(()->operator.leftBumper().getAsBoolean()).onTrue(endEffector.runOnce(() -> endEffector.setPassive(false))
-            .andThen(new MoveToPosition(Constants.Elevator.ELEVATOR_GROUND_POSITION))
-            .andThen(new TuskMoveToPosition(Constants.EndEffector.GROUND_TUSK_POSITION))
-            .andThen(new IntakeAlgae())
-            .andThen(new TuskMoveToPositionSimple(Constants.EndEffector.ALGAE_HOLD_POSITION))
-            .andThen(new MoveToPosition(0))
-            );
-
-        // Levels when left bumper is not pressed
-
-        // L4
-        operator.y().and(()->!operator.leftBumper().getAsBoolean())
-            .onTrue(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[3])
-            );
-        
-        // L3
-        operator.b().and(()->!operator.leftBumper().getAsBoolean())
-            .onTrue(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[2])
-            );
-        
-        // L2
-        operator.a().and(()->!operator.leftBumper().getAsBoolean())
-            .onTrue(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[1])
-            );
-
-
-        // Levels when left bumper is pressed
-
-        // Processor
-        operator.x().and(()->operator.leftBumper().getAsBoolean())
-            .onTrue(new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[0])
+        driver.rightTrigger().and(()->EndEffector.getInstance().algaeIn()).onTrue(
+            new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[0])
             .andThen(new TuskMoveToPosition(Constants.EndEffector.PROCESSOR_TUSK_POSITION))
-            );
+            .andThen(new ScoreAlgae())
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION))
+            .andThen(new ZeroElevator()));
 
-        // Algae Low
-        operator.a().and(()->operator.leftBumper().getAsBoolean())
-            .onTrue(endEffector.runOnce(() -> endEffector.setPassive(false))
-            .andThen(new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[1]))
+
+        Function<Integer /*level (1=low, 2=high)*/, Command> intakeAlgae = (Integer level)->
+            drivetrain.run(()->setAlignDirection(AlignDirection.Algae))
+            .andThen(new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[level]))
             .andThen(new TuskMoveToPosition(Constants.EndEffector.REEF_TUSK_POSITION))
             .andThen(new IntakeAlgae())
-            .andThen(new WaitCommand(0.5)) // TODO
-            .andThen(new MoveToPosition(0.03)
-            .alongWith(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION)))
-            );
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION))
+            .andThen(new ZeroElevator());
 
-        // Algae High
-        operator.b().and(()->operator.leftBumper().getAsBoolean())
-            .onTrue(endEffector.runOnce(() -> endEffector.setPassive(false))
-            .andThen(new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[2]))
-            .andThen(new TuskMoveToPosition(Constants.EndEffector.REEF_TUSK_POSITION))
-            .andThen(new IntakeAlgae())
-            .andThen(new WaitCommand(0.5)) // TODO
-            .andThen(new MoveToPosition(0.03)
-            .alongWith(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION)))
-            );
+        driver.leftTrigger().and(()->!EndEffector.getInstance().algaeIn()).onTrue(
+            intakeAlgae.apply(1));
         
-        // Barge
-        operator.y().and(()->operator.leftBumper().getAsBoolean())
-            .onTrue(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION)
-            .andThen(new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[3]))
-            .andThen(new TuskMoveToPosition(Constants.EndEffector.BARGE_TUSK_POSITION))
-            );
-        
-        // Zero ET HARD
-        operator.button(8).onTrue(new MoveToPosition(0.03).andThen(new TuskMoveToPosition(0)).andThen(endEffector.runOnce(() -> endEffector.setAlgaeIn(false))));
+        driver.rightTrigger().and(()->!EndEffector.getInstance().algaeIn()).onTrue(
+            intakeAlgae.apply(2));
 
-        // Zero DT
-        operator.button(7).onTrue(
-            drivetrain.runOnce(() -> {System.out.println("home"); drivetrain.seedFieldCentric();})
-            .andThen(drivetrain.runOnce(() -> drivetrain.resetPose(
-                (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) ? 
-                FlippingUtil.flipFieldPose(new Pose2d(new Translation2d(3.20992500, 4.03309382), new Rotation2d(0))) : 
-                new Pose2d(new Translation2d(3.20992500, 4.03309382), new Rotation2d(0))))));
         
+        Function<AlignDirection, Command> fullScoreAutomation = (AlignDirection alignDirection) ->
+            drivetrain.run(()->setAlignDirection(alignDirection))
+            .andThen(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[selectedLevel]))
+            .andThen(new DriveToPoseCommand(drivetrain))
+            .andThen(new Score())
+            .andThen(new ZeroElevator());
+
+    
+        driver.leftBumper().onTrue(fullScoreAutomation.apply(AlignDirection.Left));
+
+        driver.rightBumper().onTrue(fullScoreAutomation.apply(AlignDirection.Right));
+
+        driver.b().onTrue(endEffector.runOnce(() -> setSelectedLevel(1)));
+
+        driver.x().onTrue(endEffector.runOnce(() -> setSelectedLevel(3)));
+
+        driver.a().onTrue(endEffector.runOnce(() -> setSelectedLevel(2))); 
+
+        driver.y().onTrue(endEffector.runOnce(() -> setSelectedLevel(4))); 
+
+
+
     }
+
+    public void setSelectedLevel (int level)
+    {
+        selectedLevel = level;
+    }
+
 
     public void updateTelemetry() {
         logger.telemeterize(elevator, endEffector);

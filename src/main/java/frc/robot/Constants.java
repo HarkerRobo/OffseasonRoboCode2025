@@ -268,8 +268,8 @@ public class Constants {
 
         public static final double ELEVATOR_GEAR_RATIO = 6.22;
 
-        public static final double[] CORAL_HEIGHTS = { 0.5 + 0.6, 1.45, 2.85, 4.82 }; // rotations
-        public static final double[] ALGAE_HEIGHTS = { 0, 0.856 -0.05, 2.2 -0.05 , 4.82};
+        public static final double[] CORAL_HEIGHTS = { 0.5 + 0.6, 1.45, 2.85, 4.82 }; // rotations (l1, l2, l3, l4)
+        public static final double[] ALGAE_HEIGHTS = { 0, 0.856 -0.05, 2.2 -0.05 , 4.82}; // ground, low, high, barge
         public static final double ELEVATOR_GROUND_POSITION = 0.145;
 
 
