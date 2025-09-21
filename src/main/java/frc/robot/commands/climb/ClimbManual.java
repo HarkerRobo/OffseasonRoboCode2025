@@ -11,10 +11,10 @@ public class ClimbManual extends Command {
     }
 
     public void execute () {
-        if (RobotContainer.getInstance().getDriver().getUpDPadState()) {
+        if (RobotContainer.getInstance().getDriver().getLeftDPadState()) {
             Climb.getInstance().setVelocity(1.5);
         }
-        else if (RobotContainer.getInstance().getDriver().getDownDPadState() || RobotContainer.getInstance().getDriver().leftBumper().getAsBoolean())
+        else if (RobotContainer.getInstance().getDriver().getRightDPadState())
         {
             Climb.getInstance().setVelocity(-2);
         }

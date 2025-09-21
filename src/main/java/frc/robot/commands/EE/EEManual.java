@@ -19,7 +19,7 @@ public class EEManual extends Command {
     }
 
     private void runTusk() {
-        // EndEffector.getInstance().moveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION);
+        EndEffector.getInstance().moveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION);
     }
 
     private void runMain() {

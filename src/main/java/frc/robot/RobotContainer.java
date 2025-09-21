@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -26,8 +27,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.EE.IntakeAlgae;
 import frc.robot.commands.EE.IntakeCoralActive;
@@ -50,6 +53,7 @@ import frc.robot.subsystems.swerve.Modules;
 import harkerrobolib.joysticks.HSXboxController;
 
 public class RobotContainer {
+    Thread thread;
     public enum AlignDirection
     {
         Left,
@@ -84,7 +88,6 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry();
 
     private final HSXboxController driver = new HSXboxController(0);
-    private final HSXboxController operator = new HSXboxController(1);
 
     public final Drivetrain drivetrain = Modules.createDrivetrain();
     private final Elevator elevator = Elevator.getInstance();
@@ -97,7 +100,7 @@ public class RobotContainer {
     Function<RobotContainer.AlignDirection, Command> setDirectionFactory = ((AlignDirection direction) ->
         new Command() {
             public void execute () {System.out.println(direction); RobotContainer.getInstance().setAlignDirection(direction);}
-            public boolean isFinished () {return true;}});
+            public boolean isFinished () {return true;}}.withName("AlignTo" + direction.toString()));
 
     Command alignLeft = setDirectionFactory.apply(AlignDirection.Left);
     Command alignAlgae = setDirectionFactory.apply(AlignDirection.Algae);
@@ -150,17 +153,17 @@ public class RobotContainer {
                     return drive.withVelocityX(elevator.isExtended() ? xLimiterExtended.calculate(velocityX) : xLimiter.calculate(velocityX)) // Drive forward with negative Y (forward)
                                 .withVelocityY(elevator.isExtended() ? yLimiterExtended.calculate(velocityY) : yLimiter.calculate(velocityY)) // Drive left with negative X (left)
                                 .withRotationalRate(rotRate);// Drive counterclockwise with negative X (left)
-                }
-        ));
+                }).withName("SwerveManual")
+                );
 
         // operator.getLeftDPad().onTrue(alignLeft); 
-        driver.button(7).onTrue(alignLeft);
+        // driver.button(7).onTrue(alignLeft);
         // driver left/right bottom button
         
         // operator.getUpDPad().onTrue(alignAlgae);
   
         // operator.getRightDPad().onTrue(alignRight);
-        driver.button(8).onTrue(alignRight);
+        // driver.button(8).onTrue(alignRight);
 
         configureDriverBindings();
 
@@ -170,26 +173,28 @@ public class RobotContainer {
     {
         driver.leftTrigger().and(()->EndEffector.getInstance().algaeIn()).onTrue(
             new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[3])
-            .andThen(new TuskMoveToPosition(Constants.EndEffector.REEF_TUSK_POSITION))
-            .andThen(new ScoreAlgae())
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.BARGE_TUSK_POSITION))
+            .andThen(new Score())
             .andThen(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION))
-            .andThen(new ZeroElevator()));
+            .andThen(new ZeroElevator()).withName("AlgaeScoreToReef"));
 
         driver.rightTrigger().and(()->EndEffector.getInstance().algaeIn()).onTrue(
             new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[0])
             .andThen(new TuskMoveToPosition(Constants.EndEffector.PROCESSOR_TUSK_POSITION))
-            .andThen(new ScoreAlgae())
+            .andThen(new Score())
             .andThen(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION))
-            .andThen(new ZeroElevator()));
+            .andThen(new ZeroElevator()).withName("AlgaeScoreToProcessor"));
 
 
         Function<Integer /*level (1=low, 2=high)*/, Command> intakeAlgae = (Integer level)->
-            drivetrain.run(()->setAlignDirection(AlignDirection.Algae))
-            .andThen(new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[level]))
+            drivetrain.runOnce(()->setAlignDirection(AlignDirection.Algae))
+            .andThen(
+                new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[level])
+                .alongWith(new DriveToPoseCommand(drivetrain)))
             .andThen(new TuskMoveToPosition(Constants.EndEffector.REEF_TUSK_POSITION))
             .andThen(new IntakeAlgae())
             .andThen(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION))
-            .andThen(new ZeroElevator());
+            .andThen(new ZeroElevator()).withName("AlgaeIntake" + (level == 1 ? "Low" : "High"));
 
         driver.leftTrigger().and(()->!EndEffector.getInstance().algaeIn()).onTrue(
             intakeAlgae.apply(1));
@@ -198,33 +203,47 @@ public class RobotContainer {
             intakeAlgae.apply(2));
 
         
-        Function<AlignDirection, Command> fullScoreAutomation = (AlignDirection alignDirection) ->
-            drivetrain.run(()->setAlignDirection(alignDirection))
-            .andThen(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[selectedLevel]))
-            .andThen(new DriveToPoseCommand(drivetrain))
+        BiFunction<AlignDirection, Integer, Command> fullScoreAutomation = (AlignDirection alignDirection, Integer level) ->
+            drivetrain.runOnce(()->setAlignDirection(alignDirection))
+            .andThen(
+                new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[level])
+                .alongWith(new DriveToPoseCommand(drivetrain)))
             .andThen(new Score())
-            .andThen(new ZeroElevator());
+            .andThen(new ZeroElevator()).withName("ScoreL" + (level + 1) + alignDirection.toString());
 
     
-        driver.leftBumper().onTrue(fullScoreAutomation.apply(AlignDirection.Left));
+        driver.leftBumper().and(()->selectedLevel == 0).onTrue(fullScoreAutomation.apply(AlignDirection.Left, 0));
+        driver.leftBumper().and(()->selectedLevel == 1).onTrue(fullScoreAutomation.apply(AlignDirection.Left, 1));
+        driver.leftBumper().and(()->selectedLevel == 2).onTrue(fullScoreAutomation.apply(AlignDirection.Left, 2));
+        driver.leftBumper().and(()->selectedLevel == 3).onTrue(fullScoreAutomation.apply(AlignDirection.Left, 3));
 
-        driver.rightBumper().onTrue(fullScoreAutomation.apply(AlignDirection.Right));
-
-        driver.b().onTrue(endEffector.runOnce(() -> setSelectedLevel(1)));
-
-        driver.x().onTrue(endEffector.runOnce(() -> setSelectedLevel(3)));
-
-        driver.a().onTrue(endEffector.runOnce(() -> setSelectedLevel(2))); 
-
-        driver.y().onTrue(endEffector.runOnce(() -> setSelectedLevel(4))); 
+        driver.rightBumper().and(()->selectedLevel == 0).onTrue(fullScoreAutomation.apply(AlignDirection.Right, 0));
+        driver.rightBumper().and(()->selectedLevel == 1).onTrue(fullScoreAutomation.apply(AlignDirection.Right, 1));
+        driver.rightBumper().and(()->selectedLevel == 2).onTrue(fullScoreAutomation.apply(AlignDirection.Right, 2));
+        driver.rightBumper().and(()->selectedLevel == 3).onTrue(fullScoreAutomation.apply(AlignDirection.Right, 3));
 
 
+        driver.b().onTrue(endEffector.runOnce(() -> setSelectedLevel(0)).withName("SetSelectedLevelToL1"));
 
+        driver.x().onTrue(endEffector.runOnce(() -> setSelectedLevel(2)).withName("SetSelectedLevelToL3"));
+
+        driver.a().onTrue(endEffector.runOnce(() -> setSelectedLevel(1)).withName("SetSelectedLevelToL2")); 
+
+        driver.y().onTrue(endEffector.runOnce(() -> setSelectedLevel(3)).withName("SetSelectedLevelToL4")); 
+
+        driver.getDownDPad().onTrue(new Score().withName("EjectCoral"));
+        driver.getUpDPad().onTrue(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[3])
+            .alongWith(new TuskMoveToPosition(Constants.EndEffector.ALGAE_HOLD_POSITION)).withName("RaiseElevatorTusk"));
     }
 
     public void setSelectedLevel (int level)
     {
         selectedLevel = level;
+    }
+
+    public int getSelectedLevel ()
+    {
+        return selectedLevel;
     }
 
 
@@ -234,10 +253,6 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
-    }
-
-    public HSXboxController getOperator() {
-        return operator;
     }
 
     public HSXboxController getDriver() {

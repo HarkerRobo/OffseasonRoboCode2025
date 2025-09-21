@@ -11,8 +11,10 @@ import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.EndEffector;
 
@@ -36,6 +38,7 @@ public class Telemetry {
     private final DoublePublisher elevatorSensorPosition = elevatorStateTable.getDoubleTopic("Elevator Sensor Position").publish();
     private final DoublePublisher elevatorSensorVelocity = elevatorStateTable.getDoubleTopic("Elevator Sensor Velocity").publish();
     private final DoublePublisher elevatorDesiredPosition = elevatorStateTable.getDoubleTopic("Elevator Desired Position").publish();
+    private final StringPublisher elevatorCurrentCommand = elevatorStateTable.getStringTopic("Elevator Current Command").publish();
 
     /* End Effector State */
     private final NetworkTable endEffectorStateTable = defaultTable.getSubTable("EndEffectorState");
@@ -49,6 +52,7 @@ public class Telemetry {
     private final BooleanPublisher isMainStalling = endEffectorStateTable.getBooleanTopic("Is Main Stalling").publish();
     private final BooleanPublisher isAlgaeIn = endEffectorStateTable.getBooleanTopic("Is Algae In").publish();
     private final BooleanPublisher isPassive = endEffectorStateTable.getBooleanTopic("Is Passive On").publish();
+    private final StringPublisher endEffectorCurrentCommand = endEffectorStateTable.getStringTopic("End Effector Current Command").publish();
     
     /* Robot swerve drive state */
     private final NetworkTable driveStateTable = defaultTable.getSubTable("DriveState");
@@ -56,6 +60,7 @@ public class Telemetry {
     private final StructPublisher<ChassisSpeeds> driveSpeeds = driveStateTable.getStructTopic("Speeds", ChassisSpeeds.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> driveModuleStates = driveStateTable.getStructArrayTopic("ModuleStates", SwerveModuleState.struct).publish();
     private final StructArrayPublisher<SwerveModulePosition> driveModulePositions = driveStateTable.getStructArrayTopic("ModulePositions", SwerveModulePosition.struct).publish();
+    private final StringPublisher drievtrainCurrentCommand = driveStateTable.getStringTopic("Drivetrain Current Command").publish();
 
     private final double[] m_poseArray = new double[3];
     private final double[] m_moduleStatesArray = new double[8];
@@ -81,12 +86,18 @@ public class Telemetry {
 
         SignalLogger.writeDoubleArray("DriveState/Pose", m_poseArray);
         SignalLogger.writeDoubleArray("DriveState/ModuleStates", m_moduleStatesArray);
+
+        Command drievtrainCurrentCommand = RobotContainer.getInstance().drivetrain.getCurrentCommand();
+        this.drievtrainCurrentCommand.set(drievtrainCurrentCommand == null ? "None" : drievtrainCurrentCommand.getName());
     }
 
     public void telemeterize(Elevator elevator, EndEffector endEffector) {
         elevatorSensorPosition.set(elevator.getPosition());
         elevatorSensorVelocity.set(elevator.getVelocity());
         elevatorDesiredPosition.set(elevator.getDesiredPosition());
+        Command elevatorCurrentCommand = elevator.getCurrentCommand();
+        this.elevatorCurrentCommand.set(elevatorCurrentCommand == null ? 
+            "None" : elevatorCurrentCommand.getName());
 
         frontCanandcolorHit.set(endEffector.isFrontTriggered());
         backCanandcolorHit.set(endEffector.isBackTriggered());
@@ -99,5 +110,8 @@ public class Telemetry {
         isMainStalling.set(endEffector.isMainStalling());
         isAlgaeIn.set(endEffector.algaeIn());
         isPassive.set(endEffector.getPassive());
+        Command endEffectorCurrentCommand = endEffector.getCurrentCommand();
+        this.endEffectorCurrentCommand.set(endEffectorCurrentCommand == null ? 
+            "None" : endEffectorCurrentCommand.getName());
     }
 }
