@@ -196,7 +196,7 @@ public class Constants {
         public static final int kFrontLeftDriveMotorId = 3;
         public static final int kFrontLeftSteerMotorId = 1;
         public static final int kFrontLeftEncoderId = 2;
-        public static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.46);
+        public static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.457520);
         public static final boolean kFrontLeftSteerMotorInverted = true;
         public static final boolean kFrontLeftEncoderInverted = false;
 
@@ -207,7 +207,7 @@ public class Constants {
         public static final int kFrontRightDriveMotorId = 6;
         public static final int kFrontRightSteerMotorId = 4;
         public static final int kFrontRightEncoderId = 5;
-        public static final Angle kFrontRightEncoderOffset = Rotations.of(0.06689453125);
+        public static final Angle kFrontRightEncoderOffset = Rotations.of(0.066406);
         public static final boolean kFrontRightSteerMotorInverted = true;
         public static final boolean kFrontRightEncoderInverted = false;
 
@@ -258,7 +258,7 @@ public class Constants {
         public static final double STATOR_CURRENT_LIMIT = 90;
         public static final double SUPPLY_CURRENT_LIMIT = 90;
         public static final double FORWARD_SOFT_LIMIT = 4.82; // otations
-        public static final double REVERSE_SOFT_LIMIT = -0.1; // rotations
+        public static final double REVERSE_SOFT_LIMIT = -0.1 - 0.05; // rotations
 
         public static final double ZERO_SPEED = -0.1;
 
@@ -337,7 +337,7 @@ public class Constants {
 
         public static final double kP = 5; // TODO
 
-        public static final double STATOR_CURRENT_LIMIT = 100 + 20; // TODO
+        public static final double STATOR_CURRENT_LIMIT = 100 + 40; // TODO
 
         public static final double SUPPLY_CURRENT_LIMIT = 100 + 20; // TODO
 

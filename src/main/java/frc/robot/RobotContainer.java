@@ -92,9 +92,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     Function<RobotContainer.AlignDirection, Command> setDirectionFactory = ((AlignDirection direction) ->
-        new Command() {
-            public void execute () {System.out.println(direction); RobotContainer.getInstance().setAlignDirection(direction);}
-            public boolean isFinished () {return true;}});
+        drivetrain.runOnce(()->{System.out.println(direction); RobotContainer.getInstance().setAlignDirection(direction);}));
 
     Command alignLeft = setDirectionFactory.apply(AlignDirection.Left);
     Command alignAlgae = setDirectionFactory.apply(AlignDirection.Algae);
@@ -109,9 +107,19 @@ public class RobotContainer {
                 new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[2]).asProxy());
         NamedCommands.registerCommand("ElevatorL4",
                 new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[3]).asProxy());
+        NamedCommands.registerCommand("ElevatorAlgaeHigh",
+                new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[2]).asProxy());
         NamedCommands.registerCommand("Score", new Score().asProxy());
         NamedCommands.registerCommand("ZeroElevatorFast", new MoveToPosition(0.2).andThen(new MoveToPosition(0.03)).asProxy());
         NamedCommands.registerCommand("IntakeCoralActive", new IntakeCoralActive().asProxy());
+        NamedCommands.registerCommand("TuskToReef", new TuskMoveToPosition(Constants.EndEffector.REEF_TUSK_POSITION));
+        NamedCommands.registerCommand("IntakeAlgaeHold",
+            new IntakeAlgae()
+            .andThen(new TuskMoveToPositionSimple(Constants.EndEffector.ALGAE_HOLD_POSITION)));
+        NamedCommands.registerCommand("AlgaeScoreBarge", 
+            new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[3])
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.BARGE_TUSK_POSITION))
+            .andThen(new Score()));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autoChooser);
@@ -170,7 +178,7 @@ public class RobotContainer {
         driver.rightBumper().onTrue(
             new Score()
             // .andThen(new WaitCommand(0.5)) // TODO TEST
-            .andThen(alignAlgae)
+            // .andThen(alignAlgae)
             .andThen(new TuskMoveToPosition(0))
             .andThen(new ZeroTusk())
             .andThen(new MoveToPosition(0.5))

@@ -1,0 +1,73 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "ZeroElevator"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "MiddleStartRight to BackAlgae"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TuskToReef"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorAlgaeHigh"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeAlgaeHold"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Back to CenterBarge"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ZeroElevatorFast"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlgaeScoreBarge"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ZeroElevatorFast"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ZeroTusk"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
