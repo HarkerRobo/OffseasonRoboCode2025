@@ -109,6 +109,8 @@ public class RobotContainer {
                 new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[3]).asProxy());
         NamedCommands.registerCommand("ElevatorAlgaeHigh",
                 new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[2]).asProxy());
+        NamedCommands.registerCommand("ElevatorA3", 
+                new MoveToPosition(Constants.Elevator.ALGAE_HEIGHTS[3]).asProxy());      
         NamedCommands.registerCommand("Score", new Score().asProxy());
         NamedCommands.registerCommand("ZeroElevatorFast", new MoveToPosition(0.2).andThen(new MoveToPosition(0.03)).asProxy());
         NamedCommands.registerCommand("IntakeCoralActive", new IntakeCoralActive().asProxy());
@@ -192,7 +194,12 @@ public class RobotContainer {
 
         driver.x().onTrue(endEffector.runOnce(() -> endEffector.togglePassive()));
 
-        driver.a().onTrue(new ZeroElevator().andThen(new ZeroTusk()).andThen(endEffector.runOnce(() -> endEffector.setAlgaeIn(false))));
+        driver.a().onTrue(
+            endEffector.runOnce(() -> endEffector.setAlgaeIn(false))
+            .andThen(endEffector.runOnce(()->endEffector.setMainSpeed(Constants.EndEffector.INTAKE_CORAL_SLOW_SPEED)))
+            .andThen(new ZeroElevator())
+            .andThen(new ZeroTusk())
+            .andThen(EndEffector.getInstance().runOnce(()->EndEffector.getInstance().setPassive(true))));
 
         driver.y().onTrue(new MoveToPosition(0.03)
                 .andThen(new MoveToPosition(Constants.Elevator.CORAL_HEIGHTS[0])
@@ -207,11 +214,19 @@ public class RobotContainer {
         operator.rightBumper().and(()->!operator.leftBumper().getAsBoolean()).onTrue(endEffector.runOnce(() -> endEffector.setPassive(true)));
         
         operator.rightBumper().and(()->operator.leftBumper().getAsBoolean()).onTrue(endEffector.runOnce(() -> endEffector.setPassive(false))
+        
             .andThen(new MoveToPosition(Constants.Elevator.ELEVATOR_GROUND_POSITION))
             .andThen(new TuskMoveToPosition(Constants.EndEffector.GROUND_TUSK_POSITION))
             .andThen(new IntakeAlgae())
             .andThen(new TuskMoveToPositionSimple(Constants.EndEffector.ALGAE_HOLD_POSITION))
             .andThen(new MoveToPosition(0))
+            /*
+            .andThen(new MoveToPosition(0))
+            .andThen(new TuskMoveToPosition(Constants.EndEffector.LOLLIPOP_TUSK_POSITION))
+            .andThen(new IntakeAlgae())
+            .andThen(new TuskMoveToPositionSimple(Constants.EndEffector.ALGAE_HOLD_POSITION))
+            .andThen(new MoveToPosition(0))
+            */
             );
 
         // Levels when left bumper is not pressed
@@ -270,7 +285,12 @@ public class RobotContainer {
             );
         
         // Zero ET HARD
-        operator.button(8).onTrue(new MoveToPosition(0.03).andThen(new TuskMoveToPosition(0)).andThen(endEffector.runOnce(() -> endEffector.setAlgaeIn(false))));
+        operator.button(8).onTrue(
+            endEffector.runOnce(() -> endEffector.setAlgaeIn(false))
+            .andThen(endEffector.runOnce(()->endEffector.setMainSpeed(Constants.EndEffector.INTAKE_CORAL_SLOW_SPEED)))
+            .andThen(new MoveToPosition(0.03))
+            .andThen(new TuskMoveToPosition(0))
+            .andThen(EndEffector.getInstance().runOnce(()->EndEffector.getInstance().setPassive(true))));
 
         // Zero DT
         operator.button(7).onTrue(

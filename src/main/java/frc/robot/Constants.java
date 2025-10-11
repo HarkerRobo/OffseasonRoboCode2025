@@ -1,5 +1,28 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
+
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MountPoseConfigs;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -17,23 +40,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
-
-import static edu.wpi.first.units.Units.*;
-
-import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MountPoseConfigs;
-import com.ctre.phoenix6.configs.Pigeon2Configuration;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import com.pathplanner.lib.path.PathConstraints;
 
 public class Constants {
 
@@ -269,7 +275,8 @@ public class Constants {
         public static final double ELEVATOR_GEAR_RATIO = 6.22;
 
         public static final double[] CORAL_HEIGHTS = { 0.5 + 0.6, 1.45, 2.85, 4.82 }; // rotations
-        public static final double[] ALGAE_HEIGHTS = { 0, 0.856 -0.05, 2.2 -0.05 , 4.82};
+        public static final double[] ALGAE_HEIGHTS = { 0, 0.856 -0.05, 2.2 -0.05 , 4.82, 0.6};
+            // 0, a2, a3, barge, lollipop
         public static final double ELEVATOR_GROUND_POSITION = 0.145;
 
 
@@ -302,7 +309,7 @@ public class Constants {
 
         public static final double REVERSE_INTAKE_SPEED = 0.1;
 
-        public static final double ALGAE_HOLD_SPEED = 0.6; //0.175;
+        public static final double ALGAE_HOLD_SPEED = 0.4; // 0.6; //0.175;
 
         public static final double TUSK_STALLING_CURRENT = 50;
         public static final double MAIN_STALLING_CURRENT = 50;
@@ -315,6 +322,8 @@ public class Constants {
         public static final double GROUND_TUSK_POSITION = 0.415; // TODO
         public static final double PROCESSOR_TUSK_POSITION = 0.35 - 0.03;
         public static final double BARGE_TUSK_POSITION = 0.07;
+        public static final double BARGE_SCORE_TUSK_POSITION = 0.125; // TODO
+        public static final double LOLLIPOP_TUSK_POSITION = 0.3; // TODO
         public static final double ALGAE_HOLD_POSITION = 0.15;
         public static final double TUSK_QUASIZERO_POSITION = 0.02;
 

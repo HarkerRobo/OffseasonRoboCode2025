@@ -63,6 +63,24 @@
           "data": {
             "name": "ZeroTusk"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AlgaeToBackLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorA3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeAlgaeHold"
+          }
         }
       ]
     }

@@ -23,7 +23,7 @@ public class Score extends Command {
         if (EndEffector.getInstance().algaeIn())
         {
             EndEffector.getInstance().setMainSpeed(Constants.EndEffector.ALGAE_SCORE_SPEED);
-            EndEffector.getInstance().moveToPosition(Constants.EndEffector.REEF_TUSK_POSITION);
+            EndEffector.getInstance().moveToPosition(Constants.EndEffector.BARGE_SCORE_TUSK_POSITION);
         }
         else
         {
