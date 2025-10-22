@@ -186,7 +186,7 @@ public class Constants {
         public static final double kSteerGearRatio = 21.429;
         public static final Distance kWheelRadius = Inches.of(2);
 
-        public static final boolean kInvertLeftSide = false;
+        public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = true;
 
         public static final int kPigeonId = 1;
@@ -202,7 +202,7 @@ public class Constants {
         public static final int kFrontLeftDriveMotorId = 3;
         public static final int kFrontLeftSteerMotorId = 1;
         public static final int kFrontLeftEncoderId = 2;
-        public static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.457520);
+        public static final Angle kFrontLeftEncoderOffset = Rotations.of(0.270752);
         public static final boolean kFrontLeftSteerMotorInverted = true;
         public static final boolean kFrontLeftEncoderInverted = false;
 
@@ -213,7 +213,7 @@ public class Constants {
         public static final int kFrontRightDriveMotorId = 6;
         public static final int kFrontRightSteerMotorId = 4;
         public static final int kFrontRightEncoderId = 5;
-        public static final Angle kFrontRightEncoderOffset = Rotations.of(0.066406);
+        public static final Angle kFrontRightEncoderOffset = Rotations.of(-0.448975);
         public static final boolean kFrontRightSteerMotorInverted = true;
         public static final boolean kFrontRightEncoderInverted = false;
 
@@ -224,7 +224,7 @@ public class Constants {
         public static final int kBackLeftDriveMotorId = 13;
         public static final int kBackLeftSteerMotorId = 11;
         public static final int kBackLeftEncoderId = 12;
-        public static final Angle kBackLeftEncoderOffset = Rotations.of(0.379150390625);
+        public static final Angle kBackLeftEncoderOffset = Rotations.of(0.380371);
         public static final boolean kBackLeftSteerMotorInverted = true;
         public static final boolean kBackLeftEncoderInverted = false;
 
@@ -235,7 +235,7 @@ public class Constants {
         public static final int kBackRightDriveMotorId = 9;
         public static final int kBackRightSteerMotorId = 8;
         public static final int kBackRightEncoderId = 10;
-        public static final Angle kBackRightEncoderOffset = Rotations.of(0.38525390625);
+        public static final Angle kBackRightEncoderOffset = Rotations.of(-0.115479);
         public static final boolean kBackRightSteerMotorInverted = true;
         public static final boolean kBackRightEncoderInverted = false;
 
