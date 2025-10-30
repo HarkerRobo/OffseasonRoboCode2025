@@ -186,8 +186,8 @@ public class Constants {
         public static final double kSteerGearRatio = 21.429;
         public static final Distance kWheelRadius = Inches.of(2);
 
-        public static final boolean kInvertLeftSide = true;
-        public static final boolean kInvertRightSide = true;
+        public static final boolean kInvertLeftSide = false;
+        public static final boolean kInvertRightSide = false;
 
         public static final int kPigeonId = 1;
 
